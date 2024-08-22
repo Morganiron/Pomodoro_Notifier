@@ -3,6 +3,7 @@ from tkinter import messagebox
 from timer import PomodoroTimer
 from notifications import send_notification
 
+
 class PomodoroApp:
     def __init__(self):
         self.root = tk.Tk()
@@ -27,7 +28,7 @@ class PomodoroApp:
         self.work_up_button = tk.Button(self.root, text="▲", command=self.increase_work_interval)
         self.work_up_button.grid(row=0, column=2, pady=5)
         self.work_down_button = tk.Button(self.root, text="▼", command=self.decrease_work_interval)
-        self.work_down_button.grid(row=0, column=3, pady=5)
+        self.work_down_button.grid(row=0, column=3, pady=5, padx=(0, 10))  # Added right padding here
 
         # Break interval
         tk.Label(self.root, text="Break Interval (minutes):").grid(row=1, column=0, padx=10, pady=5)
@@ -37,7 +38,7 @@ class PomodoroApp:
         self.break_up_button = tk.Button(self.root, text="▲", command=self.increase_break_interval)
         self.break_up_button.grid(row=1, column=2, pady=5)
         self.break_down_button = tk.Button(self.root, text="▼", command=self.decrease_break_interval)
-        self.break_down_button.grid(row=1, column=3, pady=5)
+        self.break_down_button.grid(row=1, column=3, pady=5, padx=(0, 10))  # Added right padding here
 
         # Timer display
         self.timer_label = tk.Label(self.root, text="25:00", font=("Helvetica", 24))
@@ -49,7 +50,7 @@ class PomodoroApp:
         self.pause_button = tk.Button(self.root, text="Pause", state=tk.DISABLED, command=self.pause_timer)
         self.pause_button.grid(row=3, column=1, padx=10, pady=10)
         self.stop_button = tk.Button(self.root, text="Stop", state=tk.DISABLED, command=self.stop_timer)
-        self.stop_button.grid(row=3, column=2, padx=10, pady=10)
+        self.stop_button.grid(row=3, column=2, padx=(10, 20), pady=10)  # Adjusted padding for visual balance
 
     def increase_work_interval(self):
         self.work_interval = int(self.work_entry.get()) + 1
