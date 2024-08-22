@@ -3,7 +3,6 @@ from tkinter import messagebox
 from timer import PomodoroTimer
 from notifications import send_notification
 
-
 class PomodoroApp:
     def __init__(self):
         self.root = tk.Tk()
@@ -37,24 +36,30 @@ class PomodoroApp:
         self.break_down_button = tk.Button(self.root, text="▼", command=self.decrease_break_interval)
         self.break_down_button.grid(row=1, column=3, pady=5)
 
+        # Timer display
+        self.timer_label = tk.Label(self.root, text="25:00", font=("Helvetica", 24))
+        self.timer_label.grid(row=2, column=0, columnspan=4, pady=10)
+
         # Start, Pause, Stop buttons
         self.start_button = tk.Button(self.root, text="Start", command=self.start_timer)
-        self.start_button.grid(row=2, column=0, padx=10, pady=10)
+        self.start_button.grid(row=3, column=0, padx=10, pady=10)
         self.pause_button = tk.Button(self.root, text="Pause", state=tk.DISABLED, command=self.pause_timer)
-        self.pause_button.grid(row=2, column=1, padx=10, pady=10)
+        self.pause_button.grid(row=3, column=1, padx=10, pady=10)
         self.stop_button = tk.Button(self.root, text="Stop", state=tk.DISABLED, command=self.stop_timer)
-        self.stop_button.grid(row=2, column=2, padx=10, pady=10)
+        self.stop_button.grid(row=3, column=2, padx=10, pady=10)
 
     def increase_work_interval(self):
         self.work_interval = int(self.work_entry.get()) + 1
         self.work_entry.delete(0, tk.END)
         self.work_entry.insert(0, str(self.work_interval))
+        self.update_timer_display(self.work_interval * 60)
 
     def decrease_work_interval(self):
         if self.work_interval > 1:
             self.work_interval = int(self.work_entry.get()) - 1
             self.work_entry.delete(0, tk.END)
             self.work_entry.insert(0, str(self.work_interval))
+            self.update_timer_display(self.work_interval * 60)
 
     def increase_break_interval(self):
         self.break_interval = int(self.break_entry.get()) + 1
@@ -67,6 +72,10 @@ class PomodoroApp:
             self.break_entry.delete(0, tk.END)
             self.break_entry.insert(0, str(self.break_interval))
 
+    def update_timer_display(self, remaining_time):
+        mins, secs = divmod(remaining_time, 60)
+        self.timer_label.config(text=f"{mins:02d}:{secs:02d}")
+
     def start_timer(self):
         if self.timer is None or not self.timer.is_running:
             try:
@@ -76,11 +85,12 @@ class PomodoroApp:
                 tk.messagebox.showerror("Invalid input", "Please enter valid integers for the intervals.")
                 return
 
-            self.timer = PomodoroTimer(work_interval, break_interval, send_notification)
+            self.timer = PomodoroTimer(work_interval, break_interval, self.update_timer_display, send_notification)
             self.timer.start()
             self.pause_button.config(state=tk.NORMAL)
             self.stop_button.config(state=tk.NORMAL)
             self.start_button.config(state=tk.DISABLED)
+            self.update_timer_display(self.timer.remaining_time)
 
     def pause_timer(self):
         if self.timer:
@@ -95,6 +105,7 @@ class PomodoroApp:
             self.stop_button.config(state=tk.DISABLED)
             self.start_button.config(state=tk.NORMAL)
             self.pause_button.config(text="Pause")
+            self.update_timer_display(self.work_interval * 60)
 
     def run(self):
         self.root.mainloop()
