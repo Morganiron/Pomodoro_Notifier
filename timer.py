@@ -1,11 +1,11 @@
 import time
 import threading
 
-
 class PomodoroTimer:
-    def __init__(self, work_interval, break_interval, notify_callback):
-        self.work_interval = work_interval * 60 # Convert to seconds
+    def __init__(self, work_interval, break_interval, update_callback, notify_callback):
+        self.work_interval = work_interval * 60  # Convert to seconds
         self.break_interval = break_interval * 60
+        self.update_callback = update_callback
         self.notify_callback = notify_callback
         self.is_running = False
         self.is_paused = False
@@ -26,6 +26,7 @@ class PomodoroTimer:
             self.is_paused = True
         elif self.is_running and self.is_paused:
             self.is_paused = False
+            self.run()
 
     def stop(self):
         self.is_running = False
@@ -35,6 +36,7 @@ class PomodoroTimer:
     def run(self):
         while self.is_running and self.remaining_time > 0:
             if not self.is_paused:
+                self.update_callback(self.remaining_time)
                 time.sleep(1)
                 self.remaining_time -= 1
             if self.remaining_time == 0:
