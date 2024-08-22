@@ -12,6 +12,9 @@ class PomodoroApp:
         self.work_interval = 25
         self.break_interval = 5
 
+        # Bind the close window event
+        self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
+
         # Call method to create GUI widgets
         self.create_widgets()
 
@@ -106,6 +109,11 @@ class PomodoroApp:
             self.start_button.config(state=tk.NORMAL)
             self.pause_button.config(text="Pause")
             self.update_timer_display(self.work_interval * 60)
+
+    def on_closing(self):
+        if self.timer:
+            self.timer.stop()  # Stop the timer if it's running
+        self.root.destroy()  # Close the application
 
     def run(self):
         self.root.mainloop()
