@@ -1,8 +1,7 @@
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox, filedialog
 from timer import PomodoroTimer
-from notifications import send_notification
-
+from notifications import send_notification_with_sound
 
 class PomodoroApp:
     def __init__(self):
@@ -12,6 +11,7 @@ class PomodoroApp:
 
         self.work_interval = 25
         self.break_interval = 5
+        self.alarm_sound_path = None  # To store the selected sound file path
 
         # Bind the close window event
         self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
@@ -28,7 +28,7 @@ class PomodoroApp:
         self.work_up_button = tk.Button(self.root, text="▲", command=self.increase_work_interval)
         self.work_up_button.grid(row=0, column=2, pady=5)
         self.work_down_button = tk.Button(self.root, text="▼", command=self.decrease_work_interval)
-        self.work_down_button.grid(row=0, column=3, pady=5, padx=(0, 10))  # Added right padding here
+        self.work_down_button.grid(row=0, column=3, pady=5, padx=(0, 10))
 
         # Break interval
         tk.Label(self.root, text="Break Interval (minutes):").grid(row=1, column=0, padx=10, pady=5)
@@ -38,19 +38,32 @@ class PomodoroApp:
         self.break_up_button = tk.Button(self.root, text="▲", command=self.increase_break_interval)
         self.break_up_button.grid(row=1, column=2, pady=5)
         self.break_down_button = tk.Button(self.root, text="▼", command=self.decrease_break_interval)
-        self.break_down_button.grid(row=1, column=3, pady=5, padx=(0, 10))  # Added right padding here
+        self.break_down_button.grid(row=1, column=3, pady=5, padx=(0, 10))
 
         # Timer display
         self.timer_label = tk.Label(self.root, text="25:00", font=("Helvetica", 24))
         self.timer_label.grid(row=2, column=0, columnspan=4, pady=10)
 
+        # Sound selection button
+        self.sound_button = tk.Button(self.root, text="Select Sound", command=self.select_sound_file)
+        self.sound_button.grid(row=3, column=0, columnspan=2, padx=10, pady=10)
+
         # Start, Pause, Stop buttons
         self.start_button = tk.Button(self.root, text="Start", command=self.start_timer)
-        self.start_button.grid(row=3, column=0, padx=10, pady=10)
+        self.start_button.grid(row=4, column=0, padx=10, pady=10)
         self.pause_button = tk.Button(self.root, text="Pause", state=tk.DISABLED, command=self.pause_timer)
-        self.pause_button.grid(row=3, column=1, padx=10, pady=10)
+        self.pause_button.grid(row=4, column=1, padx=10, pady=10)
         self.stop_button = tk.Button(self.root, text="Stop", state=tk.DISABLED, command=self.stop_timer)
-        self.stop_button.grid(row=3, column=2, padx=(10, 20), pady=10)  # Adjusted padding for visual balance
+        self.stop_button.grid(row=4, column=2, padx=(10, 20), pady=10)
+
+    def select_sound_file(self):
+        file_path = filedialog.askopenfilename(
+            title="Select Alarm Sound",
+            initialdir="C:\\Windows\\Media",
+            filetypes=(("Sound files", "*.wav *.mp3"), ("All files", "*.*"))
+        )
+        if file_path:
+            self.alarm_sound_path = file_path
 
     def increase_work_interval(self):
         self.work_interval = int(self.work_entry.get()) + 1
@@ -89,7 +102,7 @@ class PomodoroApp:
                 tk.messagebox.showerror("Invalid input", "Please enter valid integers for the intervals.")
                 return
 
-            self.timer = PomodoroTimer(work_interval, break_interval, self.update_timer_display, send_notification)
+            self.timer = PomodoroTimer(work_interval, break_interval, self.update_timer_display, send_notification_with_sound, self.alarm_sound_path)
             self.timer.start()
             self.pause_button.config(state=tk.NORMAL)
             self.stop_button.config(state=tk.NORMAL)

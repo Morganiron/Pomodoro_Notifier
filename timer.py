@@ -1,12 +1,14 @@
 import time
 import threading
 
+
 class PomodoroTimer:
-    def __init__(self, work_interval, break_interval, update_callback, notify_callback):
+    def __init__(self, work_interval, break_interval, update_callback, notify_callback, sound_path=None):
         self.work_interval = work_interval * 60  # Convert to seconds
         self.break_interval = break_interval * 60
         self.update_callback = update_callback
         self.notify_callback = notify_callback
+        self.sound_path = sound_path  # Store the sound path
         self.is_running = False
         self.is_paused = False
         self.remaining_time = 0
@@ -44,13 +46,12 @@ class PomodoroTimer:
 
     def notify(self):
         if self.current_mode == 'work':
-            self.notify_callback("Break Time!", "It's time to take a break!")
+            self.notify_callback("Break Time!", "It's time to take a break!", self.sound_path)
             self.current_mode = 'break'
             self.remaining_time = self.break_interval
         else:
-            self.notify_callback("Work Time!", "Break is over! Back to work.")
+            self.notify_callback("Work Time!", "Break is over! Back to work.", self.sound_path)
             self.current_mode = 'work'
             self.remaining_time = self.work_interval
 
-        if self.is_running:
-            self.run()
+
