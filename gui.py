@@ -102,12 +102,21 @@ class PomodoroApp:
                 tk.messagebox.showerror("Invalid input", "Please enter valid integers for the intervals.")
                 return
 
-            self.timer = PomodoroTimer(work_interval, break_interval, self.update_timer_display, send_notification_with_sound, self.alarm_sound_path)
+            self.timer = PomodoroTimer(work_interval, break_interval, self.update_timer_display,
+                                       send_notification_with_sound, self.alarm_sound_path)
             self.timer.start()
             self.pause_button.config(state=tk.NORMAL)
             self.stop_button.config(state=tk.NORMAL)
             self.start_button.config(state=tk.DISABLED)
             self.update_timer_display(self.timer.remaining_time)
+
+            # Disable interval changes while running
+            self.work_entry.config(state=tk.DISABLED)
+            self.break_entry.config(state=tk.DISABLED)
+            self.work_up_button.config(state=tk.DISABLED)
+            self.work_down_button.config(state=tk.DISABLED)
+            self.break_up_button.config(state=tk.DISABLED)
+            self.break_down_button.config(state=tk.DISABLED)
 
     def pause_timer(self):
         if self.timer:
@@ -122,7 +131,14 @@ class PomodoroApp:
             self.stop_button.config(state=tk.DISABLED)
             self.start_button.config(state=tk.NORMAL)
             self.pause_button.config(text="Pause")
-            self.update_timer_display(self.work_interval * 60)
+
+            # Re-enable interval changes after stopping
+            self.work_entry.config(state=tk.NORMAL)
+            self.break_entry.config(state=tk.NORMAL)
+            self.work_up_button.config(state=tk.NORMAL)
+            self.work_down_button.config(state=tk.NORMAL)
+            self.break_up_button.config(state=tk.NORMAL)
+            self.break_down_button.config(state=tk.NORMAL)
 
     def on_closing(self):
         if self.timer:
