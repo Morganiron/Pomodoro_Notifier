@@ -1,0 +1,100 @@
+import tkinter as tk
+from tkinter import messagebox
+from timer import PomodoroTimer
+from notifications import send_notification
+
+
+class PomodoroApp:
+    def __init__(self):
+        self.root = tk.Tk()
+        self.root.title("Pomodoro Timer")
+        self.timer = None
+
+        self.work_interval = 25
+        self.break_interval = 5
+
+        # Call method to create GUI widgets
+        self.create_widgets()
+
+    def create_widgets(self):
+        # Work interval
+        tk.Label(self.root, text="Work Interval (minutes):").grid(row=0, column=0, padx=10, pady=5)
+        self.work_entry = tk.Entry(self.root, width=5)
+        self.work_entry.grid(row=0, column=1, pady=5)
+        self.work_entry.insert(0, str(self.work_interval))
+        self.work_up_button = tk.Button(self.root, text="▲", command=self.increase_work_interval)
+        self.work_up_button.grid(row=0, column=2, pady=5)
+        self.work_down_button = tk.Button(self.root, text="▼", command=self.decrease_work_interval)
+        self.work_down_button.grid(row=0, column=3, pady=5)
+
+        # Break interval
+        tk.Label(self.root, text="Break Interval (minutes):").grid(row=1, column=0, padx=10, pady=5)
+        self.break_entry = tk.Entry(self.root, width=5)
+        self.break_entry.grid(row=1, column=1, pady=5)
+        self.break_entry.insert(0, str(self.break_interval))
+        self.break_up_button = tk.Button(self.root, text="▲", command=self.increase_break_interval)
+        self.break_up_button.grid(row=1, column=2, pady=5)
+        self.break_down_button = tk.Button(self.root, text="▼", command=self.decrease_break_interval)
+        self.break_down_button.grid(row=1, column=3, pady=5)
+
+        # Start, Pause, Stop buttons
+        self.start_button = tk.Button(self.root, text="Start", command=self.start_timer)
+        self.start_button.grid(row=2, column=0, padx=10, pady=10)
+        self.pause_button = tk.Button(self.root, text="Pause", state=tk.DISABLED, command=self.pause_timer)
+        self.pause_button.grid(row=2, column=1, padx=10, pady=10)
+        self.stop_button = tk.Button(self.root, text="Stop", state=tk.DISABLED, command=self.stop_timer)
+        self.stop_button.grid(row=2, column=2, padx=10, pady=10)
+
+    def increase_work_interval(self):
+        self.work_interval = int(self.work_entry.get()) + 1
+        self.work_entry.delete(0, tk.END)
+        self.work_entry.insert(0, str(self.work_interval))
+
+    def decrease_work_interval(self):
+        if self.work_interval > 1:
+            self.work_interval = int(self.work_entry.get()) - 1
+            self.work_entry.delete(0, tk.END)
+            self.work_entry.insert(0, str(self.work_interval))
+
+    def increase_break_interval(self):
+        self.break_interval = int(self.break_entry.get()) + 1
+        self.break_entry.delete(0, tk.END)
+        self.break_entry.insert(0, str(self.break_interval))
+
+    def decrease_break_interval(self):
+        if self.break_interval > 1:
+            self.break_interval = int(self.break_entry.get()) - 1
+            self.break_entry.delete(0, tk.END)
+            self.break_entry.insert(0, str(self.break_interval))
+
+    def start_timer(self):
+        if self.timer is None or not self.timer.is_running:
+            try:
+                work_interval = int(self.work_entry.get())
+                break_interval = int(self.break_entry.get())
+            except ValueError:
+                tk.messagebox.showerror("Invalid input", "Please enter valid integers for the intervals.")
+                return
+
+            self.timer = PomodoroTimer(work_interval, break_interval, send_notification)
+            self.timer.start()
+            self.pause_button.config(state=tk.NORMAL)
+            self.stop_button.config(state=tk.NORMAL)
+            self.start_button.config(state=tk.DISABLED)
+
+    def pause_timer(self):
+        if self.timer:
+            self.timer.pause()
+            self.pause_button.config(text="Resume" if self.timer.is_paused else "Pause")
+
+    def stop_timer(self):
+        if self.timer:
+            self.timer.stop()
+            self.timer = None
+            self.pause_button.config(state=tk.DISABLED)
+            self.stop_button.config(state=tk.DISABLED)
+            self.start_button.config(state=tk.NORMAL)
+            self.pause_button.config(text="Pause")
+
+    def run(self):
+        self.root.mainloop()
