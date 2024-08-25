@@ -1,6 +1,9 @@
 from plyer import notification
-from playsound import playsound
+import pygame
 import logging
+
+# Initialize pygame mixer
+pygame.mixer.init()
 
 
 def send_notification_with_sound(title, message, sound_path=None):
@@ -9,7 +12,11 @@ def send_notification_with_sound(title, message, sound_path=None):
     # Play the selected alarm sound if provided
     if sound_path:
         logging.debug("Playing sound: %s", sound_path)
-        playsound(sound_path)
+        try:
+            pygame.mixer.music.load(sound_path)
+            pygame.mixer.music.play()
+        except Exception as e:
+            logging.error("Error playing sound: %s", e)
 
     # Send the desktop notification
     notification.notify(
