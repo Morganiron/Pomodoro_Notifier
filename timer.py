@@ -72,17 +72,6 @@ class PomodoroTimer:
         # Stop the timer
         self.is_running = False
 
-        # Play sound if one is selected
-        if self.sound_path:
-            logging.debug("Playing sound: %s", self.sound_path)
-            try:
-                pygame.mixer.music.load(self.sound_path)
-                pygame.mixer.music.play()
-                while pygame.mixer.music.get_busy():
-                    time.sleep(0.1)  # Wait for the sound to finish playing
-            except Exception as e:
-                logging.error("Error playing sound: %s", e)
-
         # Determine the next interval
         if self.current_mode == 'work':
             title = "Break Time!"
@@ -109,10 +98,8 @@ class PomodoroTimer:
         self.resume_event.wait()
         logging.debug("Popup dismissed, resume_event set. is_running=%s, is_paused=%s", self.is_running, self.is_paused)
 
-        # Reset is_running to True to ensure the timer can continue
-        self.is_running = True
-
         # Restart the timer after notification is sent and event is set
+        self.is_running = True
         logging.debug("Restarting timer thread for the next interval.")
         self.timer_thread = threading.Thread(target=self.run)
         self.timer_thread.start()

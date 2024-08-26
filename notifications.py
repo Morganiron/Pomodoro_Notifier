@@ -54,6 +54,12 @@ def show_popup_notification(title, message, sound_path, resume_event):
     def dismiss_popup():
         global stop_sound_flag
         logging.debug("Dismiss button clicked.")
+
+        # Stop the sound immediately if it's playing
+        if pygame.mixer.music.get_busy():
+            pygame.mixer.music.stop()
+            logging.debug("Sound playback stopped due to dismiss button.")
+
         stop_sound_flag = True  # Stop repeating sound
         if resume_event:
             logging.debug("Setting resume_event to allow timer to continue.")
@@ -71,10 +77,9 @@ def show_popup_notification(title, message, sound_path, resume_event):
             logging.debug("Waiting for 10 seconds before repeating sound.")
             time.sleep(10)
 
-    logging.debug("Starting thread for sound repetition.")
+    logging.debug("Running Tkinter mainloop for popup.")
     sound_thread = threading.Thread(target=repeat_sound)
     sound_thread.start()
 
-    logging.debug("Running Tkinter mainloop for popup.")
     root.mainloop()
     logging.debug("Exited Tkinter mainloop.")
