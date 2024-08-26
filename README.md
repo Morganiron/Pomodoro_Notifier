@@ -8,7 +8,8 @@ A simple Pomodoro Timer application built with Python and Tkinter. This applicat
 - **Customizable Intervals**: Users can manually adjust the length of the work and break intervals.
 - **Start, Pause, and Stop Controls**: Full control over the timer with dedicated buttons.
 - **Real-Time Countdown Display**: A visible countdown timer shows the remaining time for the current session.
-- **Desktop Notifications**: Notifications alert users when it\'s time to take a break and when the break is over.
+- **Popup Notifications**: Custom popup windows alert users when it's time to take a break and when the break is over.
+- **Sound Alerts**: Users can select a sound file to play when a work or break interval ends.
 - **Continuous Loop**: The timer alternates between work and break intervals until the user pauses or stops it.
 - **Graceful Shutdown**: The application stops the timer and closes cleanly when the window is closed.
 
@@ -27,10 +28,10 @@ cd pomodoro-timer
 
 ### Install Dependencies
 
-After cloning the repository, you need to install the \`plyer\` library for desktop notifications:
+After cloning the repository, you need to install the required libraries for sound playback and notifications:
 
 ```bash
-pip install plyer
+pip install pygame
 ```
 
 ### Running the Application
@@ -51,6 +52,7 @@ python pomodoro_timer.py
 - **Pause Timer**: Click the "Pause" button to pause the timer. You can resume it by clicking "Pause" again (which will be labeled "Resume").
 - **Stop Timer**: Click the "Stop" button to stop the timer and reset it to the initial work interval.
 - **Close the Application**: The application will automatically stop the timer and close when you close the window.
+- **Select Sound**: Use the "Select Sound" button to choose a sound file for notifications.
 
 ## Project Structure
 
@@ -77,4 +79,4 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 ## Acknowledgments
 
 - [Tkinter](https://docs.python.org/3/library/tkinter.html) - The built-in Python GUI library.
-- [Plyer](https://plyer.readthedocs.io/en/latest/) - Used for sending desktop notifications.
+- [Pygame](https://www.pygame.org/news) - Used for playing sound notifications.
