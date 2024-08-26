@@ -8,8 +8,8 @@ A simple Pomodoro Timer application built with Python and Tkinter. This applicat
 - **Customizable Intervals**: Users can manually adjust the length of the work and break intervals.
 - **Start, Pause, and Stop Controls**: Full control over the timer with dedicated buttons.
 - **Real-Time Countdown Display**: A visible countdown timer shows the remaining time for the current session.
-- **Popup Notifications**: Custom popup windows alert users when it's time to take a break and when the break is over.
-- **Sound Alerts**: Users can select a sound file to play when a work or break interval ends.
+- **Popup Notifications**: Alerts users when it\'s time to take a break and when the break is over.
+- **Sound Playback**: Optional sound notifications that repeat until the user dismisses the popup.
 - **Continuous Loop**: The timer alternates between work and break intervals until the user pauses or stops it.
 - **Graceful Shutdown**: The application stops the timer and closes cleanly when the window is closed.
 
@@ -17,7 +17,7 @@ A simple Pomodoro Timer application built with Python and Tkinter. This applicat
 
 ### Prerequisites
 
-- Python 3.x installed on your machine.
+- Python 3.x installed on your machine (for running from source).
 
 ### Clone the Repository
 
@@ -28,13 +28,13 @@ cd pomodoro-timer
 
 ### Install Dependencies
 
-After cloning the repository, you need to install the required libraries for sound playback and notifications:
+After cloning the repository, you need to install the necessary libraries:
 
 ```bash
-pip install pygame
+pip install -r requirements.txt
 ```
 
-### Running the Application
+### Running the Application from Source
 
 1. **Run the application** using the main script:
 
@@ -44,6 +44,14 @@ python pomodoro_timer.py
 
 2. The GUI will appear, and you can start using the timer.
 
+### Downloading the Executable
+
+If you prefer to use the standalone executable version, you can download it from the [releases](https://github.com/yourusername/pomodoro-timer/releases) page on GitHub. This version does not require Python to be installed on your machine.
+
+1. Go to the [releases](https://github.com/yourusername/pomodoro-timer/releases) page.
+2. Download the latest executable from the "Assets" section.
+3. Run the downloaded executable to start the Pomodoro Timer.
+
 ## Usage
 
 - **Work Interval**: Set your desired work interval (in minutes) using the input field and the up/down buttons.
@@ -52,7 +60,6 @@ python pomodoro_timer.py
 - **Pause Timer**: Click the "Pause" button to pause the timer. You can resume it by clicking "Pause" again (which will be labeled "Resume").
 - **Stop Timer**: Click the "Stop" button to stop the timer and reset it to the initial work interval.
 - **Close the Application**: The application will automatically stop the timer and close when you close the window.
-- **Select Sound**: Use the "Select Sound" button to choose a sound file for notifications.
 
 ## Project Structure
 
@@ -79,4 +86,5 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 ## Acknowledgments
 
 - [Tkinter](https://docs.python.org/3/library/tkinter.html) - The built-in Python GUI library.
-- [Pygame](https://www.pygame.org/news) - Used for playing sound notifications.
+- [Pygame](https://www.pygame.org/docs/) - Used for sound playback.
+- [Plyer](https://plyer.readthedocs.io/en/latest/) - Initially used for sending desktop notifications.
