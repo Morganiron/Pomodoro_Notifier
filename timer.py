@@ -81,7 +81,7 @@ class PomodoroTimer:
             except Exception as e:
                 logging.error("Error playing sound: %s", e)
 
-        # Send notification
+        # Send popup notification
         if self.current_mode == 'work':
             title = "Break Time!"
             message = "It's time to take a break!"
@@ -93,13 +93,9 @@ class PomodoroTimer:
             self.current_mode = 'work'
             self.remaining_time = self.work_interval
 
-        logging.debug("Sending notification: title=%s, message=%s", title, message)
-        notification.notify(
-            title=title,
-            message=message,
-            timeout=10  # Notification duration in seconds
-        )
-        logging.debug("Notification sent.")
+        logging.debug("Sending popup notification: title=%s, message=%s", title, message)
+        self.notify_callback(title, message, self.sound_path)
+        logging.debug("Popup notification sent.")
 
         # Restart the timer after notification is sent
         if not self.is_paused:
