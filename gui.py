@@ -29,8 +29,6 @@ class PomodoroApp:
                       self.work_interval, self.break_interval)
 
     def create_widgets(self):
-        logging.debug("Creating widgets...")
-
         # Work interval
         tk.Label(self.root, text="Work Interval (minutes):").grid(row=0, column=0, padx=10, pady=5)
         self.work_entry = tk.Entry(self.root, width=5)
@@ -55,9 +53,12 @@ class PomodoroApp:
         self.timer_label = tk.Label(self.root, text="25:00", font=("Helvetica", 24))
         self.timer_label.grid(row=2, column=0, columnspan=4, pady=10)
 
-        # Sound selection button
+        # Sound selection button and optional label
         self.sound_button = tk.Button(self.root, text="Select Sound", command=self.select_sound_file)
-        self.sound_button.grid(row=3, column=0, columnspan=2, padx=10, pady=10)
+        self.sound_button.grid(row=3, column=0, padx=10, pady=10, sticky='e')
+
+        self.optional_label = tk.Label(self.root, text="(optional)")
+        self.optional_label.grid(row=3, column=1, padx=5, pady=10, sticky='w')
 
         # Start, Pause, Stop buttons
         self.start_button = tk.Button(self.root, text="Start", command=self.start_timer)
