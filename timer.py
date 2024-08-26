@@ -17,6 +17,7 @@ class PomodoroTimer:
         self.remaining_time = 0
         self.current_mode = 'work'  # 'work' or 'break'
         self.timer_thread = None
+        self.resume_event = threading.Event()  # Event to control timer execution
 
         # Initialize pygame mixer for sound playback
         pygame.mixer.init()
@@ -48,6 +49,7 @@ class PomodoroTimer:
         self.is_running = False
         self.is_paused = False
         self.remaining_time = 0
+        self.resume_event.set()  # Ensure the timer can proceed if waiting
 
     def run(self):
         logging.debug("Timer running: mode=%s, remaining_time=%s seconds", self.current_mode, self.remaining_time)
@@ -81,7 +83,7 @@ class PomodoroTimer:
             except Exception as e:
                 logging.error("Error playing sound: %s", e)
 
-        # Send popup notification
+        # Determine the next interval
         if self.current_mode == 'work':
             title = "Break Time!"
             message = "It's time to take a break!"
@@ -94,12 +96,25 @@ class PomodoroTimer:
             self.remaining_time = self.work_interval
 
         logging.debug("Sending popup notification: title=%s, message=%s", title, message)
-        self.notify_callback(title, message, self.sound_path)
-        logging.debug("Popup notification sent.")
 
-        # Restart the timer after notification is sent
-        if not self.is_paused:
-            logging.debug("Restarting timer thread for the next interval.")
-            self.is_running = True
-            self.timer_thread = threading.Thread(target=self.run)
-            self.timer_thread.start()
+        # Clear the resume event before showing the popup
+        self.resume_event.clear()
+        logging.debug("Cleared resume_event, waiting for popup to be dismissed.")
+
+        # Send popup notification and pass the event
+        self.notify_callback(title, message, self.sound_path, self.resume_event)
+
+        # Wait for user to dismiss the popup before continuing
+        logging.debug("Waiting for popup to be dismissed. is_running=%s, is_paused=%s", self.is_running, self.is_paused)
+        self.resume_event.wait()
+        logging.debug("Popup dismissed, resume_event set. is_running=%s, is_paused=%s", self.is_running, self.is_paused)
+
+        # Reset is_running to True to ensure the timer can continue
+        self.is_running = True
+
+        # Restart the timer after notification is sent and event is set
+        logging.debug("Restarting timer thread for the next interval.")
+        self.timer_thread = threading.Thread(target=self.run)
+        self.timer_thread.start()
+        logging.debug("Timer thread started: mode=%s, remaining_time=%s seconds", self.current_mode,
+                      self.remaining_time)
