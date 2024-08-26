@@ -109,15 +109,11 @@ class PomodoroApp:
         self.timer_label.config(text=f"{mins:02d}:{secs:02d}")
 
     def start_timer(self):
-        logging.debug("Start button pressed.")
         if self.timer is None or not self.timer.is_running:
             try:
                 work_interval = int(self.work_entry.get())
                 break_interval = int(self.break_entry.get())
-                logging.debug("Starting timer with work_interval=%s minutes and break_interval=%s minutes.",
-                              work_interval, break_interval)
             except ValueError:
-                logging.error("Invalid input for intervals.")
                 tk.messagebox.showerror("Invalid input", "Please enter valid integers for the intervals.")
                 return
 
@@ -127,6 +123,7 @@ class PomodoroApp:
             self.pause_button.config(state=tk.NORMAL)
             self.stop_button.config(state=tk.NORMAL)
             self.start_button.config(state=tk.DISABLED)
+            self.sound_button.config(state=tk.DISABLED)  # Disable Select Sound button
             self.update_timer_display(self.timer.remaining_time)
 
             # Disable interval changes while running
@@ -138,19 +135,23 @@ class PomodoroApp:
             self.break_down_button.config(state=tk.DISABLED)
 
     def pause_timer(self):
-        logging.debug("Pause/Resume button pressed.")
         if self.timer:
             self.timer.pause()
             self.pause_button.config(text="Resume" if self.timer.is_paused else "Pause")
+            # Optionally enable the sound button if paused
+            if self.timer.is_paused:
+                self.sound_button.config(state=tk.NORMAL)
+            else:
+                self.sound_button.config(state=tk.DISABLED)
 
     def stop_timer(self):
-        logging.debug("Stop button pressed.")
         if self.timer:
             self.timer.stop()
             self.timer = None
             self.pause_button.config(state=tk.DISABLED)
             self.stop_button.config(state=tk.DISABLED)
             self.start_button.config(state=tk.NORMAL)
+            self.sound_button.config(state=tk.NORMAL)  # Re-enable Select Sound button
             self.pause_button.config(text="Pause")
 
             # Re-enable interval changes after stopping
