@@ -1,7 +1,8 @@
-import time
 import pygame
 import logging
+import time
 import tkinter as tk
+import winsound  # Import the winsound module for Windows default sound
 
 # Initialize pygame mixer
 pygame.mixer.init()
@@ -9,8 +10,8 @@ pygame.mixer.init()
 def send_notification_with_sound(title, message, sound_path=None):
     logging.debug("Sending notification: title=%s, message=%s", title, message)
 
-    # Play the selected alarm sound if provided
     if sound_path:
+        # Play the selected alarm sound
         logging.debug("Playing sound: %s", sound_path)
         try:
             pygame.mixer.music.load(sound_path)
@@ -19,6 +20,13 @@ def send_notification_with_sound(title, message, sound_path=None):
                 time.sleep(0.1)  # Wait for the sound to finish playing
         except Exception as e:
             logging.error("Error playing sound: %s", e)
+    else:
+        # Play the default Windows notification sound if no custom sound is selected
+        logging.debug("Playing default Windows notification sound")
+        try:
+            winsound.PlaySound("SystemExclamation", winsound.SND_ALIAS)
+        except Exception as e:
+            logging.error("Error playing default Windows sound: %s", e)
 
     # Create a simple Tkinter popup for the notification
     show_popup_notification(title, message)
