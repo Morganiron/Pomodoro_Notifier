@@ -1,6 +1,5 @@
 import time
 import logging
-from plyer import notification
 import pygame
 import threading
 
