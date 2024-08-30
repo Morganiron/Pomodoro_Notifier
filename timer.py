@@ -89,6 +89,9 @@ class PomodoroTimer:
         self.resume_event.clear()
         logging.debug("Cleared resume_event, waiting for popup to be dismissed.")
 
+        # Update the maximum progress bar value based on the new interval
+        self.update_callback(self.remaining_time)  # This ensures the maximum is updated in the GUI
+
         # Send popup notification and pass the event
         self.notify_callback(title, message, self.sound_path, self.resume_event)
 

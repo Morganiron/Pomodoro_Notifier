@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk,messagebox, filedialog
+from tkinter import ttk, messagebox, filedialog
 from timer import PomodoroTimer
 from notifications import send_notification_with_sound
 import logging
@@ -46,7 +46,6 @@ class PomodoroApp:
         # Progress bar
         self.progress = ttk.Progressbar(self.root, orient="horizontal", mode="determinate")
         self.progress.grid(row=1, column=0, columnspan=4, padx=20, pady=10, sticky="ew")
-        self.progress["maximum"] = self.work_interval * 60
 
         # Custom Sound Selection
         self.sound_button = tk.Button(self.root, text="Select Sound", command=self.select_sound_file, width=12)
@@ -63,11 +62,16 @@ class PomodoroApp:
         self.work_entry = tk.Entry(time_input_frame, width=5)
         self.work_entry.grid(row=0, column=1, pady=5)
         self.work_entry.insert(0, str(self.work_interval))
+        self.work_entry.bind("<KeyRelease>", self.update_maximum_time)
 
         tk.Label(time_input_frame, text="Break (min):", bg='white').grid(row=0, column=2, padx=10, pady=5)
         self.break_entry = tk.Entry(time_input_frame, width=5)
         self.break_entry.grid(row=0, column=3, pady=5)
         self.break_entry.insert(0, str(self.break_interval))
+        self.break_entry.bind("<KeyRelease>", self.update_maximum_time)
+
+        # Now call update_maximum_time after work_entry and break_entry are defined
+        self.update_maximum_time()  # Set the initial maximum based on default intervals
 
         # Buttons (Start, Pause, Stop)
         button_frame = tk.Frame(self.root, bg='white')
@@ -90,10 +94,30 @@ class PomodoroApp:
         self.update_progress_bar(remaining_time)  # Update the progress bar here
 
     def update_progress_bar(self, remaining_time):
-        total_time = self.work_interval * 60 if self.timer.current_mode == 'work' else self.break_interval * 60
+        total_time = self.progress["maximum"]  # Use the maximum set in the progress bar
         elapsed_time = total_time - remaining_time
-        self.progress["maximum"] = total_time  # Set the maximum to the total time
         self.progress["value"] = elapsed_time  # Update the current value
+
+    def update_maximum_time(self, event=None):
+        try:
+            work_interval = int(self.work_entry.get())
+            break_interval = int(self.break_entry.get())
+        except ValueError:
+            # Default to current values if parsing fails
+            work_interval = self.work_interval
+            break_interval = self.break_interval
+
+        # Determine total time based on whether the timer is running and its current mode
+        if self.timer:
+            if self.timer.current_mode == 'work':
+                total_time = work_interval * 60
+            else:
+                total_time = break_interval * 60
+        else:
+            total_time = work_interval * 60  # Default to work interval if timer is not running
+
+        self.progress["maximum"] = total_time
+        logging.debug(f"Updated progress bar maximum to {total_time} based on intervals.")
 
     def select_sound_file(self):
         file_path = filedialog.askopenfilename(
@@ -104,30 +128,6 @@ class PomodoroApp:
         if file_path:
             logging.debug("Sound file selected: %s", file_path)
             self.alarm_sound_path = file_path
-
-    def increase_work_interval(self):
-        self.work_interval = int(self.work_entry.get()) + 1
-        self.work_entry.delete(0, tk.END)
-        self.work_entry.insert(0, str(self.work_interval))
-        self.update_timer_display(self.work_interval * 60)
-
-    def decrease_work_interval(self):
-        if self.work_interval > 1:
-            self.work_interval = int(self.work_entry.get()) - 1
-            self.work_entry.delete(0, tk.END)
-            self.work_entry.insert(0, str(self.work_interval))
-            self.update_timer_display(self.work_interval * 60)
-
-    def increase_break_interval(self):
-        self.break_interval = int(self.break_entry.get()) + 1
-        self.break_entry.delete(0, tk.END)
-        self.break_entry.insert(0, str(self.break_interval))
-
-    def decrease_break_interval(self):
-        if self.break_interval > 1:
-            self.break_interval = int(self.break_entry.get()) - 1
-            self.break_entry.delete(0, tk.END)
-            self.break_entry.insert(0, str(self.break_interval))
 
     def start_timer(self):
         if self.timer is None or not self.timer.is_running:
@@ -147,10 +147,11 @@ class PomodoroApp:
             self.sound_button.config(state=tk.DISABLED)  # Disable Select Sound button
             self.update_timer_display(self.timer.remaining_time)
 
-            # Set progress bar maximum based on current mode
-            total_time = self.work_interval * 60 if self.timer.current_mode == 'work' else self.break_interval * 60
-            self.progress["maximum"] = total_time
-            self.progress["value"] = 0  # Reset progress bar
+            # Update the progress bar maximum
+            self.update_maximum_time()
+
+            # Reset progress bar to start from 0
+            self.progress["value"] = 0
 
             # Disable interval changes while running
             self.work_entry.config(state=tk.DISABLED)
