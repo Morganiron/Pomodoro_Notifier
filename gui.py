@@ -14,6 +14,7 @@ class PomodoroApp:
         logging.debug("Initializing PomodoroApp...")
         self.root = tk.Tk()
         self.root.title("Pomodoro Timer")
+        self.root.configure(bg='white')
         self.timer = None
 
         self.work_interval = 25
