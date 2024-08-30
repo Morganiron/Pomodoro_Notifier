@@ -78,6 +78,7 @@ pip-delete-this-directory.txt
 *.iws
 
 # Virtual Environment
+new_env/
 venv/
 ENV/
 env.bak/
