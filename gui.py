@@ -62,7 +62,7 @@ class PomodoroApp:
         self.work_entry = tk.Entry(time_input_frame, width=5)
         self.work_entry.grid(row=0, column=1, pady=5)
         self.work_entry.insert(0, str(self.work_interval))
-        self.work_entry.bind("<KeyRelease>", self.update_maximum_time)
+        self.work_entry.bind("<KeyRelease>", self.update_work_interval)
 
         tk.Label(time_input_frame, text="Break (min):", bg='white').grid(row=0, column=2, padx=10, pady=5)
         self.break_entry = tk.Entry(time_input_frame, width=5)
@@ -107,17 +107,19 @@ class PomodoroApp:
             work_interval = self.work_interval
             break_interval = self.break_interval
 
-        # Determine total time based on whether the timer is running and its current mode
-        if self.timer:
-            if self.timer.current_mode == 'work':
-                total_time = work_interval * 60
-            else:
-                total_time = break_interval * 60
-        else:
-            total_time = work_interval * 60  # Default to work interval if timer is not running
-
+        total_time = work_interval * 60 if self.timer and self.timer.current_mode == 'work' else break_interval * 60
         self.progress["maximum"] = total_time
         logging.debug(f"Updated progress bar maximum to {total_time} based on intervals.")
+
+    def update_work_interval(self, event=None):
+        self.update_maximum_time(event)
+        try:
+            work_interval = int(self.work_entry.get())
+        except ValueError:
+            work_interval = self.work_interval  # Use the default if parsing fails
+
+        self.work_interval = work_interval
+        self.update_timer_display(self.work_interval * 60)  # Update timer display with new work interval
 
     def select_sound_file(self):
         file_path = filedialog.askopenfilename(
@@ -180,6 +182,10 @@ class PomodoroApp:
             # Re-enable interval changes after stopping
             self.work_entry.config(state=tk.NORMAL)
             self.break_entry.config(state=tk.NORMAL)
+
+            # Reset timer display to work interval
+            self.update_timer_display(self.work_interval * 60)
+            self.progress["value"] = 0  # Reset progress bar
 
     def on_closing(self):
         logging.debug("Application closing.")
