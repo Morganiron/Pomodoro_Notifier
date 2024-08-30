@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import messagebox, filedialog
+from tkinter import ttk,messagebox, filedialog
 from timer import PomodoroTimer
 from notifications import send_notification_with_sound
 import logging
@@ -15,7 +15,7 @@ class PomodoroApp:
         self.root = tk.Tk()
         self.root.title("Pomodoro Timer")
         self.root.configure(bg='white')
-        self.root.minsize(511, 400)
+        self.root.minsize(525, 450)
         self.timer = None
 
         self.work_interval = 25
@@ -31,46 +31,69 @@ class PomodoroApp:
                       self.work_interval, self.break_interval)
 
     def create_widgets(self):
-        # Work interval
-        tk.Label(self.root, text="Focus (min):", bg='white').grid(row=0, column=0, padx=10, pady=5)
-        self.work_entry = tk.Entry(self.root, width=5)
-        self.work_entry.grid(row=0, column=1, pady=5)
-        self.work_entry.insert(0, str(self.work_interval))
-        self.work_up_button = tk.Button(self.root, text="▲", command=self.increase_work_interval)
-        self.work_up_button.grid(row=0, column=2, pady=5)
-        self.work_down_button = tk.Button(self.root, text="▼", command=self.decrease_work_interval)
-        self.work_down_button.grid(row=0, column=3, pady=5, padx=(0, 10))
-
-        # Break interval
-        tk.Label(self.root, text="Break (min):", bg='white').grid(row=1, column=0, padx=10, pady=5)
-        self.break_entry = tk.Entry(self.root, width=5)
-        self.break_entry.grid(row=1, column=1, pady=5)
-        self.break_entry.insert(0, str(self.break_interval))
-        self.break_up_button = tk.Button(self.root, text="▲", command=self.increase_break_interval)
-        self.break_up_button.grid(row=1, column=2, pady=5)
-        self.break_down_button = tk.Button(self.root, text="▼", command=self.decrease_break_interval)
-        self.break_down_button.grid(row=1, column=3, pady=5, padx=(0, 10))
+        # Configure grid layout
+        self.root.grid_rowconfigure(0, weight=2)  # For TimerTextBlock
+        self.root.grid_rowconfigure(1, weight=0)  # For Progress Bar
+        self.root.grid_rowconfigure(2, weight=0)  # For Custom Sound Button
+        self.root.grid_rowconfigure(3, weight=0)  # For Custom Input
+        self.root.grid_rowconfigure(4, weight=1)  # For Buttons
+        self.root.grid_columnconfigure(0, weight=1)
 
         # Timer display
-        self.timer_label = tk.Label(self.root, text="25:00", font=("Helvetica", 24), bg='white')
-        self.timer_label.grid(row=2, column=0, columnspan=4, pady=10)
+        self.timer_label = tk.Label(self.root, text="25:00", font=("Helvetica", 48), bg='white')
+        self.timer_label.grid(row=0, column=0, columnspan=4, pady=10, sticky='n')
 
-        # Sound selection button and optional label
-        self.sound_button = tk.Button(self.root, text="Select Sound", command=self.select_sound_file)
-        self.sound_button.grid(row=3, column=0, padx=10, pady=10, sticky='e')
+        # Progress bar
+        self.progress = ttk.Progressbar(self.root, orient="horizontal", mode="determinate")
+        self.progress.grid(row=1, column=0, columnspan=4, padx=20, pady=10, sticky="ew")
+        self.progress["maximum"] = self.work_interval * 60
+
+        # Custom Sound Selection
+        self.sound_button = tk.Button(self.root, text="Select Sound", command=self.select_sound_file, width=12)
+        self.sound_button.grid(row=2, column=0, padx=10, pady=5, sticky='e')
 
         self.optional_label = tk.Label(self.root, text="(optional)", bg='white')
-        self.optional_label.grid(row=3, column=1, padx=5, pady=10, sticky='w')
+        self.optional_label.grid(row=2, column=1, padx=5, pady=5, sticky='w')
 
-        # Start, Pause, Stop buttons
-        self.start_button = tk.Button(self.root, text="Start", command=self.start_timer)
-        self.start_button.grid(row=4, column=0, padx=10, pady=10)
-        self.pause_button = tk.Button(self.root, text="Pause", state=tk.DISABLED, command=self.pause_timer)
-        self.pause_button.grid(row=4, column=1, padx=10, pady=10)
-        self.stop_button = tk.Button(self.root, text="Stop", state=tk.DISABLED, command=self.stop_timer)
-        self.stop_button.grid(row=4, column=2, padx=(10, 20), pady=10)
+        # Custom Time Input
+        time_input_frame = tk.Frame(self.root, bg='white')
+        time_input_frame.grid(row=3, column=0, columnspan=4, pady=10)
+
+        tk.Label(time_input_frame, text="Work (min):", bg='white').grid(row=0, column=0, padx=10, pady=5)
+        self.work_entry = tk.Entry(time_input_frame, width=5)
+        self.work_entry.grid(row=0, column=1, pady=5)
+        self.work_entry.insert(0, str(self.work_interval))
+
+        tk.Label(time_input_frame, text="Break (min):", bg='white').grid(row=0, column=2, padx=10, pady=5)
+        self.break_entry = tk.Entry(time_input_frame, width=5)
+        self.break_entry.grid(row=0, column=3, pady=5)
+        self.break_entry.insert(0, str(self.break_interval))
+
+        # Buttons (Start, Pause, Stop)
+        button_frame = tk.Frame(self.root, bg='white')
+        button_frame.grid(row=4, column=0, columnspan=4, pady=20)
+
+        self.start_button = tk.Button(button_frame, text="Start", command=self.start_timer, width=10)
+        self.start_button.pack(side='left', padx=10)
+
+        self.pause_button = tk.Button(button_frame, text="Pause", state=tk.DISABLED, command=self.pause_timer, width=10)
+        self.pause_button.pack(side='left', padx=10)
+
+        self.stop_button = tk.Button(button_frame, text="Stop", state=tk.DISABLED, command=self.stop_timer, width=10)
+        self.stop_button.pack(side='left', padx=10)
 
         logging.debug("Widgets created successfully.")
+
+    def update_timer_display(self, remaining_time):
+        mins, secs = divmod(remaining_time, 60)
+        self.timer_label.config(text=f"{mins:02d}:{secs:02d}")
+        self.update_progress_bar(remaining_time)  # Update the progress bar here
+
+    def update_progress_bar(self, remaining_time):
+        total_time = self.work_interval * 60 if self.timer.current_mode == 'work' else self.break_interval * 60
+        elapsed_time = total_time - remaining_time
+        self.progress["maximum"] = total_time  # Set the maximum to the total time
+        self.progress["value"] = elapsed_time  # Update the current value
 
     def select_sound_file(self):
         file_path = filedialog.askopenfilename(
@@ -106,10 +129,6 @@ class PomodoroApp:
             self.break_entry.delete(0, tk.END)
             self.break_entry.insert(0, str(self.break_interval))
 
-    def update_timer_display(self, remaining_time):
-        mins, secs = divmod(remaining_time, 60)
-        self.timer_label.config(text=f"{mins:02d}:{secs:02d}")
-
     def start_timer(self):
         if self.timer is None or not self.timer.is_running:
             try:
@@ -128,13 +147,14 @@ class PomodoroApp:
             self.sound_button.config(state=tk.DISABLED)  # Disable Select Sound button
             self.update_timer_display(self.timer.remaining_time)
 
+            # Set progress bar maximum based on current mode
+            total_time = self.work_interval * 60 if self.timer.current_mode == 'work' else self.break_interval * 60
+            self.progress["maximum"] = total_time
+            self.progress["value"] = 0  # Reset progress bar
+
             # Disable interval changes while running
             self.work_entry.config(state=tk.DISABLED)
             self.break_entry.config(state=tk.DISABLED)
-            self.work_up_button.config(state=tk.DISABLED)
-            self.work_down_button.config(state=tk.DISABLED)
-            self.break_up_button.config(state=tk.DISABLED)
-            self.break_down_button.config(state=tk.DISABLED)
 
     def pause_timer(self):
         if self.timer:
@@ -159,10 +179,6 @@ class PomodoroApp:
             # Re-enable interval changes after stopping
             self.work_entry.config(state=tk.NORMAL)
             self.break_entry.config(state=tk.NORMAL)
-            self.work_up_button.config(state=tk.NORMAL)
-            self.work_down_button.config(state=tk.NORMAL)
-            self.break_up_button.config(state=tk.NORMAL)
-            self.break_down_button.config(state=tk.NORMAL)
 
     def on_closing(self):
         logging.debug("Application closing.")
