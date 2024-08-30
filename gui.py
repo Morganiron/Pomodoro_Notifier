@@ -32,7 +32,7 @@ class PomodoroApp:
 
     def create_widgets(self):
         # Work interval
-        tk.Label(self.root, text="Work Interval (minutes):").grid(row=0, column=0, padx=10, pady=5)
+        tk.Label(self.root, text="Focus (min):", bg='white').grid(row=0, column=0, padx=10, pady=5)
         self.work_entry = tk.Entry(self.root, width=5)
         self.work_entry.grid(row=0, column=1, pady=5)
         self.work_entry.insert(0, str(self.work_interval))
@@ -42,7 +42,7 @@ class PomodoroApp:
         self.work_down_button.grid(row=0, column=3, pady=5, padx=(0, 10))
 
         # Break interval
-        tk.Label(self.root, text="Break Interval (minutes):").grid(row=1, column=0, padx=10, pady=5)
+        tk.Label(self.root, text="Break (min):", bg='white').grid(row=1, column=0, padx=10, pady=5)
         self.break_entry = tk.Entry(self.root, width=5)
         self.break_entry.grid(row=1, column=1, pady=5)
         self.break_entry.insert(0, str(self.break_interval))
@@ -52,14 +52,14 @@ class PomodoroApp:
         self.break_down_button.grid(row=1, column=3, pady=5, padx=(0, 10))
 
         # Timer display
-        self.timer_label = tk.Label(self.root, text="25:00", font=("Helvetica", 24))
+        self.timer_label = tk.Label(self.root, text="25:00", font=("Helvetica", 24), bg='white')
         self.timer_label.grid(row=2, column=0, columnspan=4, pady=10)
 
         # Sound selection button and optional label
         self.sound_button = tk.Button(self.root, text="Select Sound", command=self.select_sound_file)
         self.sound_button.grid(row=3, column=0, padx=10, pady=10, sticky='e')
 
-        self.optional_label = tk.Label(self.root, text="(optional)")
+        self.optional_label = tk.Label(self.root, text="(optional)", bg='white')
         self.optional_label.grid(row=3, column=1, padx=5, pady=10, sticky='w')
 
         # Start, Pause, Stop buttons
