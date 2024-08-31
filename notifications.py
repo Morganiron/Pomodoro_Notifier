@@ -1,3 +1,5 @@
+import sys
+
 import pygame
 import logging
 import tkinter as tk
@@ -5,15 +7,21 @@ import winsound  # Import the winsound module for Windows default sound
 import time  # Import time for time.sleep
 import threading  # Import threading for handling sound playback in the background
 
+# Check if running as a frozen executable or logging is already disabled
+if getattr(sys, 'frozen', False) or logging.getLogger().disabled:
+    logging.disable(logging.CRITICAL)
+
 # Initialize pygame mixer
 pygame.mixer.init()
 
 # Global flag to stop sound
 stop_sound_flag = False
 
+
 def send_notification_with_sound(title, message, sound_path=None, resume_event=None):
     global stop_sound_flag
-    logging.debug("send_notification_with_sound called: title=%s, message=%s, sound_path=%s", title, message, sound_path)
+    logging.debug("send_notification_with_sound called: title=%s, message=%s, sound_path=%s", title, message,
+                  sound_path)
 
     # Reset the stop sound flag
     stop_sound_flag = False
@@ -22,6 +30,7 @@ def send_notification_with_sound(title, message, sound_path=None, resume_event=N
     popup_thread = threading.Thread(target=show_popup_notification, args=(title, message, sound_path, resume_event))
     popup_thread.start()
     logging.debug("Popup notification thread started.")
+
 
 def play_sound(sound_path):
     logging.debug("play_sound called with sound_path=%s", sound_path)
@@ -41,6 +50,7 @@ def play_sound(sound_path):
             winsound.PlaySound("SystemExclamation", winsound.SND_ALIAS | winsound.SND_ASYNC)
         except Exception as e:
             logging.error("Error playing default Windows sound: %s", e)
+
 
 def show_popup_notification(title, message, sound_path, resume_event):
     logging.debug("Creating popup window: title=%s, message=%s", title, message)

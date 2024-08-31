@@ -1,15 +1,19 @@
+import sys
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
 from timer import PomodoroTimer
 from notifications import send_notification_with_sound
 import logging
 
-# Disable all logging messages
-logging.disable(logging.CRITICAL)
-
-# Configure logging
-logging.basicConfig(filename='pomodoro.log', level=logging.DEBUG,
-                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+# Check if running as a frozen executable
+if getattr(sys, 'frozen', False):
+    # Disable all logging to prevent log file creation
+    logging.disable(logging.CRITICAL)
+else:
+    # Configure logging only if not already disabled
+    if not logging.getLogger().disabled:
+        logging.basicConfig(filename='pomodoro.log', level=logging.DEBUG,
+                            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 
 class PomodoroApp:

@@ -1,7 +1,12 @@
+import sys
 import time
 import logging
 import pygame
 import threading
+
+# Check if running as a frozen executable or logging is already disabled
+if getattr(sys, 'frozen', False) or logging.getLogger().disabled:
+    logging.disable(logging.CRITICAL)
 
 
 class PomodoroTimer:
