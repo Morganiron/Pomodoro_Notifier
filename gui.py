@@ -4,6 +4,9 @@ from timer import PomodoroTimer
 from notifications import send_notification_with_sound
 import logging
 
+# Disable all logging messages
+logging.disable(logging.CRITICAL)
+
 # Configure logging
 logging.basicConfig(filename='pomodoro.log', level=logging.DEBUG,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
