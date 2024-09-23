@@ -11,8 +11,8 @@ if getattr(sys, 'frozen', False) or logging.getLogger().disabled:
 
 class PomodoroTimer:
     def __init__(self, work_interval, break_interval, update_callback, notify_callback, sound_path=None):
-        self.work_interval = work_interval * 60  # Convert to seconds
-        self.break_interval = break_interval * 60
+        self.work_interval = work_interval * 60  # Convert work interval to seconds
+        self.break_interval = break_interval  # Break interval is already in seconds, no need to multiply
         self.update_callback = update_callback
         self.notify_callback = notify_callback
         self.sound_path = sound_path  # Store the sound path
@@ -22,6 +22,7 @@ class PomodoroTimer:
         self.current_mode = 'work'  # 'work' or 'break'
         self.timer_thread = None
         self.resume_event = threading.Event()  # Event to control timer execution
+
 
         # Initialize pygame mixer for sound playback
         pygame.mixer.init()
@@ -82,20 +83,24 @@ class PomodoroTimer:
             message = "It's time to take a break!"
             self.current_mode = 'break'
             self.remaining_time = self.break_interval
+
+            # Update the maximum progress bar value based on break interval
+            self.update_callback(self.break_interval, False)  # Pass 'False' to indicate it's an interval change
+
         else:
             title = "Work Time!"
             message = "Break is over! Back to work."
             self.current_mode = 'work'
             self.remaining_time = self.work_interval
 
+            # Update the maximum progress bar value based on work interval
+            self.update_callback(self.work_interval, False)  # Pass 'False' to indicate it's an interval change
+
         logging.debug("Sending popup notification: title=%s, message=%s", title, message)
 
         # Clear the resume event before showing the popup
         self.resume_event.clear()
         logging.debug("Cleared resume_event, waiting for popup to be dismissed.")
-
-        # Update the maximum progress bar value based on the new interval
-        self.update_callback(self.remaining_time)  # This ensures the maximum is updated in the GUI
 
         # Send popup notification and pass the event
         self.notify_callback(title, message, self.sound_path, self.resume_event)

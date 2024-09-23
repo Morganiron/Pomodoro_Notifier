@@ -73,11 +73,18 @@ class PomodoroApp:
         self.work_entry.insert(0, str(self.work_interval))
         self.work_entry.bind("<KeyRelease>", self.update_work_interval)
 
+        # Break input in minutes
         tk.Label(time_input_frame, text="Break (min):", bg='white').grid(row=0, column=2, padx=10, pady=5)
         self.break_entry = tk.Entry(time_input_frame, width=5)
         self.break_entry.grid(row=0, column=3, pady=5)
         self.break_entry.insert(0, str(self.break_interval))
         self.break_entry.bind("<KeyRelease>", self.update_break_interval)
+
+        # Break input in seconds
+        tk.Label(time_input_frame, text="sec:", bg='white').grid(row=0, column=4, padx=10, pady=5)
+        self.break_entry_sec = tk.Entry(time_input_frame, width=5)
+        self.break_entry_sec.grid(row=0, column=5, pady=5)
+        self.break_entry_sec.insert(0, "0")  # Default seconds to 0
 
         # Buttons (Start, Pause, Stop)
         button_frame = tk.Frame(self.root, bg='white')
@@ -97,8 +104,16 @@ class PomodoroApp:
     def update_timer_display(self, remaining_time, update_progress=True):
         mins, secs = divmod(remaining_time, 60)
         self.timer_label.config(text=f"{mins:02d}:{secs:02d}")
+
+        # Update progress bar only if the timer is running
         if update_progress and self.timer and self.timer.is_running:
-            self.update_progress_bar(remaining_time)  # Update the progress bar only if the timer is running
+            # Check if we need to update the maximum for the progress bar
+            if self.timer.current_mode == 'work':
+                self.progress["maximum"] = self.work_interval * 60
+            else:
+                self.progress["maximum"] = (int(self.break_entry.get()) * 60) + int(self.break_entry_sec.get())
+
+            self.update_progress_bar(remaining_time)  # Update the progress bar
 
     def update_progress_bar(self, remaining_time):
         total_time = self.progress["maximum"]  # Use the maximum set in the progress bar
@@ -136,12 +151,22 @@ class PomodoroApp:
         if self.timer is None or not self.timer.is_running:
             try:
                 work_interval = int(self.work_entry.get())
-                break_interval = int(self.break_entry.get())
+                break_interval_minutes = int(self.break_entry.get())  # Get break interval in minutes
+                break_interval_seconds = int(self.break_entry_sec.get())  # Get break interval in seconds
             except ValueError:
                 tk.messagebox.showerror("Invalid input", "Please enter valid integers for the intervals.")
                 return
 
-            self.timer = PomodoroTimer(work_interval, break_interval, self.update_timer_display,
+            total_break_interval = (break_interval_minutes * 60) + break_interval_seconds  # Convert to total seconds
+
+            if total_break_interval <= 0:
+                tk.messagebox.showerror("Invalid input", "Break interval cannot be zero or negative.")
+                return
+
+            logging.debug(f"Starting timer with work_interval={work_interval} minutes, "
+                          f"total_break_interval={total_break_interval} seconds.")
+
+            self.timer = PomodoroTimer(work_interval, total_break_interval, self.update_timer_display,
                                        send_notification_with_sound, self.alarm_sound_path)
             self.timer.start()
             self.pause_button.config(state=tk.NORMAL)
@@ -152,9 +177,9 @@ class PomodoroApp:
 
             # Set the maximum for the progress bar based on the initial mode
             if self.timer.current_mode == 'work':
-                self.progress["maximum"] = work_interval * 60
+                self.progress["maximum"] = work_interval * 60  # Set maximum based on work interval in seconds
             else:
-                self.progress["maximum"] = break_interval * 60
+                self.progress["maximum"] = total_break_interval  # Set maximum based on total break interval in seconds
 
             # Reset progress bar to start from 0
             self.progress["value"] = 0
@@ -162,6 +187,7 @@ class PomodoroApp:
             # Disable interval changes while running
             self.work_entry.config(state=tk.DISABLED)
             self.break_entry.config(state=tk.DISABLED)
+            self.break_entry_sec.config(state=tk.DISABLED)
 
     def pause_timer(self):
         if self.timer:
@@ -186,6 +212,7 @@ class PomodoroApp:
             # Re-enable interval changes after stopping
             self.work_entry.config(state=tk.NORMAL)
             self.break_entry.config(state=tk.NORMAL)
+            self.break_entry_sec.config(state=tk.NORMAL)
 
             # Reset timer display to work interval
             self.update_timer_display(self.work_interval * 60, update_progress=False)  # No progress bar update
